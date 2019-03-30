@@ -3,6 +3,11 @@
 import logging
 
 
+PORN_TRAINING_DIR = "pornTrainingDirectory"
+NON_PORN_TRAINING_DIR = "nonPornTrainingDirectory"
+TEST_DIR = "testDriectory"
+
+
 def setupLogging(fileName):
     # setup log file and log depth 
 
@@ -20,11 +25,15 @@ def setupLogging(fileName):
     logger.addHandler(fileHandler)
     logger.addHandler(streamHandler)
 
-def getFilePathList(dirPath):
+def getImagePathList(dirPath, targetExt=["jpg","jpeg","png","PNG"]):
     # get File Path List in "dirPath"
+    
     filePathList = []
     filenames = os.listdir(dirPath)
     for filename in filenames:
+        fileExt = filename.split('.')[-1]
+        if not (fileExt in targetExt):
+            continue
         fullPath = os.path.join(dirPath,filename)
         filePathList.append(fullPath)
     

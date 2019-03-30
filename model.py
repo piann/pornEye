@@ -10,7 +10,7 @@ class Model:
         self.sess = sess
         self.name = name
 
-    def learnByModel(self):
+    def build(self):
         pass
 
     def train(self):
