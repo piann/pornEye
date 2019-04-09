@@ -17,8 +17,8 @@ def preprocessImg(imgPath):
     return raveledData
 
 def denseToOneHot(y_data, num_classes=2):
-    # just import from other source
-    
+    # just imported from other source
+
     num_labels = y_data.shape[0]
     index_offset = np.arange(num_labels) * num_classes
     labels_one_hot = np.zeros((num_labels, num_classes))

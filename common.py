@@ -6,7 +6,8 @@ import logging
 PORN_TRAINING_DIR = "pornTrainingDirectory"
 NON_PORN_TRAINING_DIR = "nonPornTrainingDirectory"
 TEST_DIR = "testDriectory"
-
+RESIZED_WIDTH = 256
+RESIZED_HEIGHT = 256
 
 def setupLogging(fileName):
     # setup log file and log depth 
@@ -27,7 +28,7 @@ def setupLogging(fileName):
 
 def getImagePathList(dirPath, targetExt=["jpg","jpeg","png","PNG"]):
     # get File Path List in "dirPath"
-    
+
     filePathList = []
     filenames = os.listdir(dirPath)
     for filename in filenames:
