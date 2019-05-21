@@ -26,14 +26,14 @@ def setupLogging(fileName):
     logger.addHandler(fileHandler)
     logger.addHandler(streamHandler)
 
-def getImagePathList(dirPath, targetExt=["jpg","jpeg","png","PNG"]):
+def getImagePathList(dirPath, targetExt=["jpg","jpeg","png"]):
     # get File Path List in "dirPath"
 
     filePathList = []
     filenames = os.listdir(dirPath)
     for filename in filenames:
         fileExt = filename.split('.')[-1]
-        if not (fileExt in targetExt):
+        if not (fileExt.lower() in targetExt):
             continue
         fullPath = os.path.join(dirPath,filename)
         filePathList.append(fullPath)

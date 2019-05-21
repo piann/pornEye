@@ -7,8 +7,7 @@ import cv2
 
 
 def preprocessImg(imgPath):
-    RESIZED_WIDTH = 256
-    RESIZED_HEIGHT = 256
+
 
     imgObj = cv2.imread(imgPath)
     imgObj = cv2.resize(imgObj, (RESIZED_HEIGHT, RESIZED_WIDTH))
