@@ -40,8 +40,10 @@ def getDataSet():
     
     random.shuffle(sampleList)
 
-    testSet = sampleList[:int(TEST_RATIO*len(sampleList))]
     trainSet = sampleList[int(TEST_RATIO*len(sampleList)):]
+    sizeOfTraining = len(trainSet)
+    testSet = sampleList[:int(TEST_RATIO*len(sampleList))]
+    sizeOfTest = len(testSet)
 
     x_train = [data[0] for data in trainSet]
     y_train = [data[1] for data in trainSet]
@@ -51,4 +53,7 @@ def getDataSet():
     y_train = denseToOneHot(y_train)
     y_test = denseToOneHot(y_test)
 
-    return x_train, y_train, x_test, y_test 
+    return x_train, y_train, x_test, y_test, sizeOfTraining, sizeOfTest 
+
+
+    

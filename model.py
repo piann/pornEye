@@ -14,6 +14,8 @@ class Model:
         self.training = tf.placeholder(tf.bool)
         self.X = tf.placeholder(tf.float32, shape=[None,  RESIZED_HEIGHT * RESIZED_WIDTH  * 3])
         self.Y = tf.placeholder(tf.float32, shape=[None, 2])
+        self.dropoutRate = tf.placeholder(tf.float32)
+        logging.info("Model Init")
 
     def build(self):
 
@@ -28,7 +30,7 @@ class Model:
         pool1 = tf.layers.max_pooling2d(inputs=conv1,
         pool_size=[2,2], padding="SAME", strides=2)
         dropout1= tf.layers.dropout(inputs=pool1,
-        rates=0.1, training=self.isTraining)
+        rates=self.dropoutRate, training=self.isTraining)
 
 
         # conv layer #2
@@ -37,7 +39,7 @@ class Model:
         pool2 = tf.layers.max_pooling2d(inputs=conv2,
         pool_size=[2,2], padding="SAME", strides=2)
         dropout2= tf.layers.dropout(inputs=pool2,
-        rates=0.2, training=self.isTraining)
+        rates=self.dropoutRate, training=self.isTraining)
 
         # conv layer #3
         conv3 = tf.layers.conv2d(inputs=dropout2, 
@@ -45,13 +47,13 @@ class Model:
         pool3 = tf.layers.max_pooling2d(inputs=conv3,
         pool_size=[2,2], padding="SAME", strides=2)
         dropout3= tf.layers.dropout(inputs=pool3,
-        rates=0.3, training=self.isTraining)
+        rates=self.dropoutRate, training=self.isTraining)
 
         # dense layer
         flat = tf.reshape(dropout3, [-1, 256*4*4])
         dense = tf.layer.dense(inputs=flat, unit=1024, activation=tf.nn.relu)
         dropout4 = tf.layers.dropout(inputs=dense,
-        rate=0.4, training=self.isTraining)
+        rate=self.dropoutRate, training=self.isTraining)
 
         self.logits = tf.layers.dense(inputs=dropout4, units=2)
 
@@ -67,18 +69,19 @@ class Model:
         self.accuracy = tf.reduce_mean(tf.cast(correction, tf.float32))
 
 
-    def train(self, x_test, y_test, isTraining=True):
+    def train(self, x_test, y_test, dropoutRate, isTraining=True):
         return self.sess.run(self.logits,
-        feed_dict={X:x_test, Y:y_test self.isTraining:isTraining}
+        feed_dict={X:x_test, Y:y_test self.isTraining:isTraining, self.dropoutRate:dropoutRate}
         )
         
 
     def predict(self, x_test, isTraining=False):
         return self.sess.run(self.logits, 
-        feed_dict={X:x_test, self.isTraining:isTraining}
+        feed_dict={X:x_test, self.isTraining:isTraining, self.dropoutRate:0.0}
         )
         
     def getAccuracy(self, isTraining=False):
         return self.sess.run(self.accuracy,
-        feed_dict={X:x_test, self.isTraining:isTraining})
+        feed_dict={X:x_test, self.isTraining:isTraining, self.dropoutRate:0.0}
+        )
     

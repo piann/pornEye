@@ -6,6 +6,7 @@ import cv2
 import os
 import random
 
+
 def addSaltPepperToImg(img):
     saltRatio = 0.006
     pepperRatio = 0.001

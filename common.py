@@ -8,6 +8,9 @@ NON_PORN_TRAINING_DIR = "nonPornTrainingDirectory"
 TEST_DIR = "testDriectory"
 RESIZED_WIDTH = 256
 RESIZED_HEIGHT = 256
+TRAINING_EPOCH = 3000
+
+
 
 def setupLogging(fileName):
     # setup log file and log depth 
