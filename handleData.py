@@ -1,9 +1,9 @@
 import random
 from common import *
 import cv2
-
-
-
+import os
+import numpy as np
+import logging
 
 
 def preprocessImg(imgPath):
@@ -35,20 +35,23 @@ def getDataSet():
     nonPornImageObjList = [preprocessImg(p) for p in nonPornImagePathList]
     
     # 1 means porn, 0 means non-porn
-    sampleList = [(data, 1) for data in pornImageObjList] + 
-                 [(data, 0) for data in nonPornImageObjList]
+    sampleList = [(data, 1) for data in pornImageObjList] + [(data, 0) for data in nonPornImageObjList]
     
     random.shuffle(sampleList)
 
     trainSet = sampleList[int(TEST_RATIO*len(sampleList)):]
     sizeOfTraining = len(trainSet)
+    
     testSet = sampleList[:int(TEST_RATIO*len(sampleList))]
     sizeOfTest = len(testSet)
 
-    x_train = [data[0] for data in trainSet]
-    y_train = [data[1] for data in trainSet]
-    x_test = [data[0] for data in testSet]
-    y_test = [data[1] for data in testSet]
+    logging.debug(sizeOfTraining)
+    logging.debug(sizeOfTest)
+
+    x_train = np.array([data[0] for data in trainSet])
+    y_train = np.array([data[1] for data in trainSet])
+    x_test = np.array([data[0] for data in testSet])
+    y_test = np.array([data[1] for data in testSet])
 
     y_train = denseToOneHot(y_train)
     y_test = denseToOneHot(y_test)

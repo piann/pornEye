@@ -1,14 +1,14 @@
 # methods for general use
 
 import logging
-
+import os
 
 PORN_TRAINING_DIR = "pornTrainingDirectory"
 NON_PORN_TRAINING_DIR = "nonPornTrainingDirectory"
 TEST_DIR = "testDriectory"
-RESIZED_WIDTH = 256
-RESIZED_HEIGHT = 256
-TRAINING_EPOCH = 3000
+RESIZED_WIDTH = 128
+RESIZED_HEIGHT = 128
+
 
 
 
@@ -20,7 +20,7 @@ def setupLogging(fileName):
     fileHandler.setFormatter( logging.Formatter('%(asctime)s:%(levelname)s:[%(filename)s.%(funcName)s]%(message)s', '%m-%d %H:%M:%S'))
 
     streamHandler = logging.StreamHandler()
-    streamHandler.setLevel(logging.INFO)
+    streamHandler.setLevel(logging.DEBUG)
     streamHandler.setFormatter( logging.Formatter('%(asctime)s:%(levelname)s:[%(filename)s.%(funcName)s]%(message)s', '%m-%d %H:%M:%S'))
 
     logger = logging.getLogger('')
