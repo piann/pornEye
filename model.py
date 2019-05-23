@@ -10,7 +10,7 @@ class Model:
     def __init__(self, sess, name):
         self.sess = sess
         self.name = name
-        self.learningRate = 0.003
+        self.learningRate = 0.0001
         self.isTraining = tf.placeholder(tf.bool)
         self.X = tf.placeholder(tf.float32, shape=[None,  RESIZED_HEIGHT * RESIZED_WIDTH  * 3])
         self.Y = tf.placeholder(tf.float32, shape=[None, 2])
@@ -52,7 +52,7 @@ class Model:
 
         # dense layer
         flat = tf.reshape(dropout3, [-1, 128*128*4])
-        dense = tf.layers.dense(inputs=flat, units=625, activation=tf.nn.relu)
+        dense = tf.layers.dense(inputs=flat, units=700, activation=tf.nn.relu)
         dropout4 = tf.layers.dropout(inputs=dense,
         rate=self.dropoutRate, training=self.isTraining)
 
@@ -68,11 +68,15 @@ class Model:
             learning_rate=self.learningRate
         ).minimize(self.cost)
 
-        correction = tf.equal(tf.argmax(self.logits,1), tf.argmax(self.Y,1))
-        self.accuracy = tf.reduce_mean(tf.cast(correction, tf.float32))
+        self.correction = tf.equal(self.prediction, tf.argmax(self.Y,1))
+        self.accuracy = tf.reduce_mean(tf.cast(self.correction, tf.float32))
 
 
     def train(self, x_train, y_train, dropoutRate, isTraining=True):
+        logging.debug(self.sess.run(self.prediction,feed_dict={self.X:x_train, self.isTraining:isTraining, self.dropoutRate:dropoutRate}))
+        logging.debug(self.sess.run(tf.argmax(self.Y,1),feed_dict={self.X:x_train, self.Y:y_train, self.isTraining:isTraining, self.dropoutRate:dropoutRate}))
+        logging.debug(self.sess.run(self.accuracy,feed_dict={self.X:x_train, self.Y:y_train, self.isTraining:isTraining, self.dropoutRate:dropoutRate}))
+        
         return self.sess.run([self.cost, self.optimizer],
         feed_dict={self.X:x_train, self.Y:y_train, self.isTraining:isTraining, self.dropoutRate:dropoutRate}
         )
@@ -84,6 +88,10 @@ class Model:
         )
         
     def getAccuracy(self, x_test, y_test,isTraining=False):
+        logging.debug(self.sess.run(self.prediction,feed_dict={self.X:x_test, self.isTraining:isTraining, self.dropoutRate:0.0}))
+        logging.debug(self.sess.run(tf.argmax(self.Y,1),feed_dict={self.X:x_test, self.Y:y_test, self.isTraining:isTraining, self.dropoutRate:0.0}))
+        logging.debug(self.sess.run(self.accuracy,feed_dict={self.X:x_test, self.Y:y_test, self.isTraining:isTraining, self.dropoutRate:0.0}))
+        
         return self.sess.run(self.accuracy,
         feed_dict={self.X:x_test, self.Y:y_test, self.isTraining:isTraining, self.dropoutRate:0.0}
         )

@@ -17,12 +17,12 @@ class Factory(object):
         init_l = tf.local_variables_initializer()
         self.sess.run(init_g)
         self.sess.run(init_l)
-        self.batchSize = 30
+        self.batchSize = 20
         self.modelFilePath = './pornEye.model'
         
         logging.info("Factory Init")
 
-    def train(self, iteration, dropoutRate=0.25):
+    def train(self, iteration, dropoutRate=0.05):
         x_train, y_train, x_test, y_test, sizeOfTraining, sizeOfTest = getDataSet()
         for epoch in range(iteration):
             averageCost = 0
@@ -32,14 +32,14 @@ class Factory(object):
                 x_batch = x_train[idx*self.batchSize:(idx+1)*self.batchSize]
                 y_batch = y_train[idx*self.batchSize:(idx+1)*self.batchSize]
                 
-                cost, _ = self.modelML.train(x_batch, y_batch, 0.1)
+                cost, _ = self.modelML.train(x_batch, y_batch, dropoutRate)
                 logging.debug("batch idx : {0}".format(idx))
                 
 
                 averageCost += cost / totalBatch
 
             acc = self.modelML.getAccuracy(x_test, y_test)
-            logging.info("Epoch: {}, accuracy: {}, Cost: {}".format(epoch, averageCost, acc))
+            logging.info("Epoch: {}, accuracy: {:.2f}%, Cost: {}".format(epoch,acc*100,averageCost))
 
         logging.info("Learning Done")
 
@@ -49,13 +49,14 @@ class Factory(object):
         saver.save(self.sess, self.modelFilePath)
         logging.info("Done")
 
-    def loadModel(self):
-        if os.path.exists(self.modelFilePath): 
+    def loadModel(self): 
+        try: 
             saver = tf.train.Saver()
             saver.restore(self.sess, self.modelFilePath)
             logging.info("Done")
-        else:
-            logging.info("There is no model. This is first try")
+        
+        except:
+            logging.info("Fail to load model")
     
     def predict(self, filePath):
         packedData = np.ndarray((1, RESIZED_HEIGHT*RESIZED_WIDTH*3))
@@ -88,6 +89,7 @@ if __name__ == '__main__':
             executer.loadModel()
             result = executer.predict(filePath)
             logging.info("result is {}".format(result))
+            executer.saveModel()
         elif opt == '-f':
             executer.loadModel()
             folderPath = param
@@ -95,12 +97,12 @@ if __name__ == '__main__':
             for imgPath in imgPathList:
                 result = executer.predict(imgPath)
                 logging.info("{0: <20} : {1}".format(os.path.basename(imgPath), result))
-                
+            executer.saveModel()
 
 
         elif opt == '-t':
             executer.loadModel()
-            executer.train(iteration=4)
+            executer.train(iteration=3)
             executer.saveModel()
         
         else:
