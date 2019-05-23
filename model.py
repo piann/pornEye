@@ -10,7 +10,7 @@ class Model:
     def __init__(self, sess, name):
         self.sess = sess
         self.name = name
-        self.learningRate = 0.0001
+        self.learningRate = 0.0003
         self.isTraining = tf.placeholder(tf.bool)
         self.X = tf.placeholder(tf.float32, shape=[None,  RESIZED_HEIGHT * RESIZED_WIDTH  * 3])
         self.Y = tf.placeholder(tf.float32, shape=[None, 2])
@@ -88,9 +88,6 @@ class Model:
         )
         
     def getAccuracy(self, x_test, y_test,isTraining=False):
-        logging.debug(self.sess.run(self.prediction,feed_dict={self.X:x_test, self.isTraining:isTraining, self.dropoutRate:0.0}))
-        logging.debug(self.sess.run(tf.argmax(self.Y,1),feed_dict={self.X:x_test, self.Y:y_test, self.isTraining:isTraining, self.dropoutRate:0.0}))
-        logging.debug(self.sess.run(self.accuracy,feed_dict={self.X:x_test, self.Y:y_test, self.isTraining:isTraining, self.dropoutRate:0.0}))
         
         return self.sess.run(self.accuracy,
         feed_dict={self.X:x_test, self.Y:y_test, self.isTraining:isTraining, self.dropoutRate:0.0}

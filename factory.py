@@ -10,36 +10,50 @@ import os
 import sys
 
 class Factory(object):
-    def __init__(self):
-        self.sess = tf.InteractiveSession()
-        self.modelML = Model(self.sess, 'pornEye')
+    def __init__(self, numOfEnsemble=5):
+        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.8)
+        self.sess = tf.InteractiveSession(config=tf.ConfigProto(gpu_options=gpu_options))
+        self.numOfEnsemble = numOfEnsemble
+        self.modelList = []
+        for idx in range(self.numOfEnsemble):
+            modelML = Model(self.sess, 'pornEye_{}'.format(idx))
+            self.modelList.append(modelML)
+
         init_g = tf.global_variables_initializer()
         init_l = tf.local_variables_initializer()
         self.sess.run(init_g)
         self.sess.run(init_l)
-        self.batchSize = 20
-        self.modelFilePath = './pornEye.model'
+        self.batchSize = 25
+        self.modelFilePath = './modelFolder/model.ckpt'
         
         logging.info("Factory Init")
 
     def train(self, iteration, dropoutRate=0.05):
         x_train, y_train, x_test, y_test, sizeOfTraining, sizeOfTest = getDataSet()
         for epoch in range(iteration):
-            averageCost = 0
+            averageCostList = np.zeros(self.numOfEnsemble)
             totalBatch = int(sizeOfTraining/self.batchSize)
 
-            for idx in range(totalBatch):
-                x_batch = x_train[idx*self.batchSize:(idx+1)*self.batchSize]
-                y_batch = y_train[idx*self.batchSize:(idx+1)*self.batchSize]
+            for idx in range(totalBatch+1):
                 
-                cost, _ = self.modelML.train(x_batch, y_batch, dropoutRate)
-                logging.debug("batch idx : {0}".format(idx))
+                if (idx+1)*self.batchSize < sizeOfTraining:
+                    x_batch = x_train[idx*self.batchSize:(idx+1)*self.batchSize]
+                    y_batch = y_train[idx*self.batchSize:(idx+1)*self.batchSize]
+                else:
+                    x_batch = x_train[sizeOfTraining-self.batchSize:sizeOfTraining]
+                    y_batch = y_train[sizeOfTraining-self.batchSize:sizeOfTraining]
+            
+
+                for modelIdx, modelML in enumerate(self.modelList):
+                    cost, _ = modelML.train(x_batch, y_batch, dropoutRate)
+                    logging.debug("batch idx : {}, model idx: {}".format(idx, modelIdx))
                 
 
-                averageCost += cost / totalBatch
+                averageCostList[modelIdx] += cost / totalBatch
 
-            acc = self.modelML.getAccuracy(x_test, y_test)
-            logging.info("Epoch: {}, accuracy: {:.2f}%, Cost: {}".format(epoch,acc*100,averageCost))
+            for modelIdx, modelML in enumerate(self.modelList):
+                acc = modelML.getAccuracy(x_test, y_test)
+                logging.info("Model #{}, Epoch: {}, accuracy: {:.2f}%, Cost: {}".format(modelIdx, epoch,acc*100,averageCostList[modelIdx]))
 
         logging.info("Learning Done")
 
@@ -62,7 +76,8 @@ class Factory(object):
         packedData = np.ndarray((1, RESIZED_HEIGHT*RESIZED_WIDTH*3))
         imgData = preprocessImg(filePath)
         packedData[0] = imgData
-        return self.modelML.predict(packedData)
+        resultList = [modelML.predict(packedData)[0] for modelML in self.modelList]    
+        return np.argmax(np.bincount(resultList))
 
 def help():
     print("Help :")
@@ -102,7 +117,7 @@ if __name__ == '__main__':
 
         elif opt == '-t':
             executer.loadModel()
-            executer.train(iteration=3)
+            executer.train(iteration=10)
             executer.saveModel()
         
         else:
