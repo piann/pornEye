@@ -11,8 +11,9 @@ import sys
 
 class Factory(object):
     def __init__(self, numOfEnsemble=5):
-        gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.8)
-        self.sess = tf.InteractiveSession(config=tf.ConfigProto(gpu_options=gpu_options))
+        cfg = tf.ConfigProto()
+        cfg.gpu_options.allow_growth = True
+        self.sess = tf.InteractiveSession(config=cfg)
         self.numOfEnsemble = numOfEnsemble
         self.modelList = []
         for idx in range(self.numOfEnsemble):
@@ -40,13 +41,14 @@ class Factory(object):
                     x_batch = x_train[idx*self.batchSize:(idx+1)*self.batchSize]
                     y_batch = y_train[idx*self.batchSize:(idx+1)*self.batchSize]
                 else:
-                    x_batch = x_train[sizeOfTraining-self.batchSize:sizeOfTraining]
-                    y_batch = y_train[sizeOfTraining-self.batchSize:sizeOfTraining]
+                    x_batch = x_train[-10:]
+                    y_batch = y_train[-10:]
             
 
                 for modelIdx, modelML in enumerate(self.modelList):
                     cost, _ = modelML.train(x_batch, y_batch, dropoutRate)
-                    logging.debug("batch idx : {}, model idx: {}".format(idx, modelIdx))
+                    if idx%(totalBatch/20) == 0:
+                        logging.debug("batch idx : {}, model idx: {}".format(idx, modelIdx))
                 
 
                 averageCostList[modelIdx] += cost / totalBatch
